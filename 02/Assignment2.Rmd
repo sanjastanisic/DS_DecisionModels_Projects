@@ -1,0 +1,120 @@
+---
+title: "Assignment 2 - Integer Linear Programming"
+output:
+  prettydoc::html_pretty:
+    df_print: paged
+    highlight: vignette
+    theme: architect
+    toc: yes
+    toc_depth: 5
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '5'
+  ioslides_presentation:
+    css:
+    - css/fonts.css
+    - css/custom.css
+    - css/title-slide.css
+    - css/slide-background.css
+    includes:
+      before_body: html/title.html
+    toc: yes
+    transition: default
+    widescreen: yes
+  pdf_document:
+    toc: yes
+    toc_depth: 5
+  word_document:
+    toc: yes
+    toc_depth: '5'
+  slidy_presentation:
+    highlight: default
+  beamer_presentation:
+    colortheme: lily
+    fig_caption: no
+    fig_height: 6
+    fig_width: 7
+    fonttheme: structurebold
+    theme: Hannover
+    toc: yes
+course: Decision Models
+---
+
+```{r setup, include=FALSE}
+# Use 'verbatim = TRUE' as chunk option to show chunk code as is
+require(knitr)
+hook_source_def = knit_hooks$get('source')
+knit_hooks$set(source = function(x, options){
+  if (!is.null(options$verbatim) && options$verbatim){
+    opts = gsub(",\\s*verbatim\\s*=\\s*TRUE\\s*", "", options$params.src)
+    bef = sprintf('\n\n    ```{r %s}\n', opts, "\n")
+    stringr::str_c(bef, paste(knitr:::indent_block(x, "    "), collapse = '\n'), "\n    ```\n")
+  } else {
+     hook_source_def(x, options)
+  }
+})
+```
+
+
+## Problem 1
+Consider the following ILP:
+
+$$
+\begin{aligned}
+&\max \quad 9 x_{1}+5 x_{2}+6 x_{3}+4 x_{4}\\
+&\text { s.t. } \quad \\
+&6 x_{1}+3 x_{2}+5 x_{3}+2 x_{4} \leq 10, \\
+&x_{3}+x_{4} \leq 1,\\
+&-x_{1}+x_{3} \leq 0,\\
+&-x_{2}+x_{4} \leq 0\\
+&x_{1}, x_{2}, x_{3}, x_{4} \in\{0,1\}
+\end{aligned}
+$$
+
+The following tree represents the solutions of all possible relaxations of the problem in which no sub-problem has been excluded (fathoming).
+
+
+
+<center>
+![](tree.png){width=600px}
+
+</center>
+<br>
+<br>
+
+Suppose that the Branch and Bound (BB) algorithm applies to this problem. Also, let's suppose that the algorithm visits the sub-problems in the following order P0 , P1 , . . . , P16. Clearly, the algorithm does not visit all nodes. 
+
+
+1) Determine the nodes that will be visited by the BB algorithm and for each of them get the upper and lower limit deduced by the algorithm in the execution.
+
+2) Solve the problem with an ILP solver and check the value of the objective function matches the one found at point 1.
+
+## Problem 2
+
+SunNet is a residential Internet Service Provider (ISP) in the central Florida area.
+Presently, the company operates one centralized facility that all of its clients call into for Internet access. 
+
+To improve service, the company is planning to open three satellite offices in the cities of Pine Hills, Eustis, and Sanford. 
+The company has identified five different regions to be serviced by these three offices. 
+The following table summarizes the number of customers in each region, the service capacity at each office, and the monthly average cost per customer for providing the service to each region from each office. Table entries of “n.a.” indicate infeasible region-to-service center combinations. 
+
+SunNet would like to determine how many customers from each region to assign to each service center to minimize the total cost.
+
+$$
+\begin{array}{lllll}
+\text { Region } & \text { Pine Hills } & \text { Eustis } & \text { Sanford } & \text { Customers } \\ 
+1 & \$ 6.50 & \$ 7.50 & \text { n.a. } & 30,000 \\ 
+2 & \$ 7.00 & \$ 8.00 & \text { n.a. } & 40,000 \\ 
+3 & \$ 8.25 & \$ 7.25 & \$ 6.75 & 25,000 \\ 
+4 & \text { n.a. } & \$ 7.75 & \$ 7.00 & 35,000 \\ 
+5 & \text { n.a. } & \$ 7.50 & \$ 6.75 & 33,000 \\ 
+\hline
+\text { Capacity } & 60,000 & 70,000 & 40,000 & 
+\end{array}
+$$
+
+1) Draw a network flow model to represent this problem.
+2) Implement your model and solve it.
+3) What is the optimal solution?
+

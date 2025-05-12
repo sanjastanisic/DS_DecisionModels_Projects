@@ -1,0 +1,456 @@
+---
+title: "Assignment 1 - Solution"
+author: "Sanja Stanisic, n. 800409"
+date: "29 March 2020"
+output:
+  prettydoc::html_pretty:
+    df_print: paged
+    highlight: vignette
+    theme: architect
+    toc: yes
+    toc_depth: 5
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '5'
+  slidy_presentation:
+    highlight: default
+  pdf_document:
+    toc: yes
+    toc_depth: 5
+  beamer_presentation:
+    colortheme: lily
+    fig_caption: no
+    fig_height: 6
+    fig_width: 7
+    fonttheme: structurebold
+    theme: Hannover
+    toc: yes
+  ioslides_presentation:
+    css:
+    - css/fonts.css
+    - css/custom.css
+    - css/title-slide.css
+    - css/slide-background.css
+    includes:
+      before_body: html/title.html
+    toc: yes
+    transition: default
+    widescreen: yes
+course: Decision Models
+---
+
+```{r setup, include=FALSE}
+# Use 'verbatim = TRUE' as chunk option to show chunk code as is
+if(require(knitr)==FALSE) install.packages("knitr")
+hook_source_def = knit_hooks$get('source')
+knit_hooks$set(source = function(x, options){
+  if (!is.null(options$verbatim) && options$verbatim){
+    opts = gsub(",\\s*verbatim\\s*=\\s*TRUE\\s*", "", options$params.src)
+    bef = sprintf('\n\n    ```{r %s}\n', opts, "\n")
+    stringr::str_c(bef, paste(knitr:::indent_block(x, "    "), collapse = '\n'), "\n    ```\n")
+  } else {
+     hook_source_def(x, options)
+  }
+})
+```
+
+## Problem
+A trading company is looking for a way to maximize profit per transportation of their goods. The company has a train available with 3 wagons. 
+
+When stocking the wagons they can choose among 4 types of cargo, each with its own specifications. 
+How much of each cargo type should be loaded on which wagon in order to maximize profit?
+
+### More Data
+|TRAIN WAGON $j$	|WEIGHT CAPACITY (TONNE) $w_j$	|VOLUME CAPACITY ($m^2$) $s_j$|
+|-----------------|-------------------------------|-----------------------------|
+|(wag) 1 	        |10	                            |5000                         |
+|(wag) 2	        |8	                            |4000                         |
+|(wag) 3	        |12	                            |8000                         |
+  
+
+
+
+|CARGO TYPE	$i$ |AVAILABLE (TONNE) $a_i$	|VOLUME ($m^2$) $v_i$	|PROFIT (PER TONNE) $p_i$ |
+|---------------|-------------------------|---------------------|-------------------------|
+|(cg) 1	        |18	                      |400	                |2000                     |
+|(cg) 2	        |10	                      |300	                |2500                     |
+|(cg) 3	        |5	                      |200	                |5000                     |
+|(cg) 4	        |20	                      |500	                |3500                     |
+
+
+### Decision Variables
+
+$x_{ij}$ the weight of cargo of type $i$ loaded on a wagon $j$. 
+
+$i \in \{1,2,3,4\}$
+
+$j \in \{1,2,3\}$
+
+Therefore, there are **$12$** decision variables.
+
+For example, **$x_{12}$** stands for the weight (in tonnes) of cargo type **$1$** placed in wagon **$2$**.
+
+### Objective Function
+
+The objective function is to maximize the profit:
+
+**$$max: 2000(x_{11} + x_{12} + x_{13}) \\
+          + 2500(x_{21} + x_{22} + x_{23}) \\
+          + 5000(x_{31} + x_{32} + x_{33}) \\
+          + 3500(x_{41} + x_{42} + x_{43}) \\ $$**
+
+### Constraints
+
+**Weight Capacity Constraints**
+
+Total weight of cargo that can be placed in each wagon: 
+
+1. $\sum_{i=1}^{4} x_{i1} \le 10$  
+
+
+2. $\sum_{i=1}^{4} x_{i2} \le 8$  
+
+3. $\sum_{i=1}^{4} x_{i3} \le 12$  
+
+**Volume Capacity Constraints**
+
+Total volume of cargo that can be placed in each wagon: 
+
+1. $400 x_{11} + 300 x_{21} + 200 x_{31} + 500 x_{41}  \le 5000$ 
+
+2. $400 x_{12} + 300 x_{22} + 200 x_{32} + 500 x_{42}  \le 4000$  
+
+3. $400 x_{13} + 300 x_{23} + 200 x_{33} + 500 x_{43}  \le 8000$  
+
+**Cargo Avaliability Constraints**
+
+Weight of available cargo of each type: 
+
+1.$x_{11} + x_{12} + x_{13}  \le 18$  
+
+2. $x_{21} + x_{22} + x_{23}  \le 10$   
+
+3. $x_{31} + x_{32} + x_{33}  \le 5$ 
+
+4. $x_{41} + x_{42} + x_{43}  \le 20$   
+
+**Boundaries**
+
+The decision variables should not be negative: 
+
+$x_{ij} \ge 0$,  $\forall i,j$
+
+## Model
+
+```{r, echo=TRUE, eval=TRUE, message=FALSE}
+if(require(lpSolveAPI)==FALSE) install.packages("lpSolveAPI")
+
+model = make.lp(0,12)
+
+name.lp(model, "Transportation problem")
+
+```
+
+### Objective Function
+
+The decision variables are mapped to the model according to the following scheme: 
+
+$$ x_{11} \rightarrow 1 \\
+   x_{12} \rightarrow 2 \\
+   x_{13} \rightarrow 3 \\
+   x_{21} \rightarrow 4 \\
+   x_{22} \rightarrow 5 \\
+   x_{23} \rightarrow 6 \\
+   x_{31} \rightarrow 7 \\
+   x_{32} \rightarrow 8 \\
+   x_{33} \rightarrow 9 \\
+   x_{41} \rightarrow 10 \\
+   x_{42} \rightarrow 11 \\
+   x_{43} \rightarrow 12 $$
+   
+```{r, echo=TRUE, eval=FALSE, message=FALSE}
+
+lp.control(model, sense = "max")
+
+set.objfn(model, obj = c(2000,2000,2000,2500,2500,2500,5000,5000,5000,3500,3500,3500))
+```
+### Constraints
+
+```{r, echo=TRUE, eval=TRUE}
+
+add.constraint(model,
+               xt = c(1,1,1,1),
+               type = "<=",
+               rhs = 10,
+               indices = c(1,4,7,10))
+
+add.constraint (model,
+                xt = c(1,1,1,1),
+                type = "<=",
+                rhs = 8,
+                indices = c(2,5,8,11))
+
+add.constraint (model,
+                xt = c(1,1,1,1),
+                type = "<=",
+                rhs = 12,
+                indices = c(3,6,9,12))
+
+add.constraint (model,
+                xt = c(400,300,200,500),
+                type = "<=",
+                rhs = 5000,
+                indices = c(1,4,7,10))
+
+add.constraint (model,
+                xt = c(400,300,200,500),
+                type = "<=",
+                rhs = 4000,
+                indices = c(2,5,8,11))
+
+add.constraint (model,
+                xt = c(400,300,200,500),
+                type = "<=",
+                rhs = 8000,
+                indices = c(3,6,9,12))
+
+add.constraint(model,
+               xt = c(1,1,1),
+               type = "<=",
+               rhs = 18,
+               indices = c(1:3))
+
+add.constraint(model,
+               xt = c(1,1,1),
+               type = "<=",
+               rhs = 10,
+               indices = c(4:6))
+
+add.constraint(model,
+               xt = c(1,1,1),
+               type = "<=",
+               rhs = 5,
+               indices = c(7:9))
+
+add.constraint(model,
+               xt = c(1,1,1),
+               type = "<=",
+               rhs = 20,
+               indices = c(10:12))
+
+```
+
+### Boundaries
+```{r, echo=TRUE, eval=TRUE}
+
+set.bounds(model,lower = rep(0,12))
+```
+
+### Model display
+```{r, echo=TRUE, eval=TRUE, message=TRUE}
+
+patch <- function( f, before, after ) { 
+  f_text <- capture.output(dput(f))
+  g_text <- gsub( before, after, f_text )
+  g <- eval( parse( text = g_text ) )
+  environment(g) <- environment(f)
+  g
+}
+
+print.lpExtPtr <- patch( print.lpExtPtr, "8", "16" )
+
+model
+
+```
+### Model solving
+```{r, echo=TRUE, eval=TRUE}
+solve(model)
+```
+
+### Results
+```{r, echo=TRUE, eval=TRUE}
+vars <- get.variables(model)
+vars
+```
+As calculated, the profit is maximized when: 
+
+* $5$ tonnes of cargo type $2$ is placed in wagon n.$1$
+* $5$ tonnes of cargo type $3$ is placed in wagon n.$1$
+* $8$ tonnes of cargo type $4$ is placed in wagon n.$2$
+* $12$ tonnes of cargo type $4$ is paced in wagon n.$3$
+
+```{r, echo=TRUE, eval=TRUE}
+obj <- get.objective(model)
+obj
+```
+If the suggested model of cargo displacement is applied, the profit obtained will be \$ $107500$. 
+
+```{r, echo=TRUE, eval=TRUE}
+constr <- get.constraints(model)
+constr
+```
+
+According to this model, in order to maximize the profit, the maximum allowed weight is stocked in all wagons. However, in the first wagon only $2500$ $m^2$ out of available $5000$ $m^2$ is occupied, while in the second wagon the entire volume is occupied, and in the third wagon $6000$ $m^2$ out of $8000$ $m^2$ of avaliable space is occupied. 
+The solution suggest that we do not stock the cargo type $1$, we load $5$ out of $10$ available tonnes of cargo type $2$, $5$ out of $5$ available tonnes of cargo type $3$, and $20$ out of $20$ available tonnes of cargo type $4$. 
+
+All of the above, can be summarized as follows: 
+
+```{r, echo=TRUE, eval=TRUE}
+primal.sol <-get.primal.solution(model)
+primal.sol
+```
+
+```{r, echo=TRUE, eval=TRUE}
+get.basis(lprec = model, nonbasic = FALSE)  
+```
+
+Due to the fact that $10$ slack variables are enlisted at the begininig, the optimal basis consists of the following variables: $C_4, C_{11}, C_{12},S_4, S_5, S_6, S_7, C_5, C_7$ and $S_8$
+
+
+## Sensitivity analysis
+
+```{r, echo=TRUE, eval=TRUE}
+if(require(dplyr)==FALSE) install.packages("dplyr")
+
+# Helper function for sensitivity analysis of objective function
+printSensitivityObj2 <- function(model){
+  options(scipen=999)
+  arg.obj = get.sensitivity.obj(model)
+  
+  numRows <- length(arg.obj$objfrom)
+  symb <- c() 
+  for (i in c(1:numRows)) 
+    symb[i] <- paste("C", i, sep = "" ) 
+   
+  obj <- data.frame(Objs = symb, arg.obj)
+  a <- mutate(obj,objfrom=replace(objfrom, objfrom < -1.0e4, "-inf"))
+  b <- mutate(a,objtill=replace(objtill, objtill > 1.0e4, "inf"))
+  result <- ""
+  result <- cat("    Objs", "\t", "  Sensitivity", "\n")
+  i <- 1
+  for (row in 1:nrow(b)) {
+    Objs <- b[row, "Objs"]
+    objfrom  <- b[row, "objfrom"]
+    objtill  <- b[row, "objtill"]
+    s <- paste( i, ".\t", Objs, "\t", objfrom, " <= ", Objs, " <= ", objtill)
+    result <- cat( result, s, sep = "\n")
+    i <- i+1
+  }
+  print(result)
+}
+```
+
+
+```{r, echo=TRUE, eval=TRUE}
+printSensitivityObj2(model)
+```
+
+The sensitivity analysis of the **Objective Function** suggest that the determined basis will remain the sam if: 
+
+* $-\infty  \ge C_1 \ge 2500$  
+
+* $-\infty  \ge C_2  \ge  2500$ 
+
+* $-\infty  \ge C_3  \ge  2500$   
+
+* $2500 \ge  C_4  \ge  2500$  
+
+* $-\infty  \ge C_5  \ge  2500$   
+
+* $-\infty  \ge C_6  \ge  2500$  
+
+* $5000  \ge  C_7 \ge  \infty$ 
+
+* $-\infty  \ge C_8  \ge  5000$ 
+
+* $-\infty  \ge C_9  \ge  5000$ 
+
+* $-\infty  \ge C_10  \ge  3500$ 
+
+* $3500 \ge C_11  \ge 3500$
+
+* $3500  \ge  C_12  \ge  \infty$ 
+
+```{r, echo=TRUE, eval=TRUE}
+get.dual.solution(model)   
+```
+The result obtained indicates that the array $[2500, 2500, 2500, 0,    0,    0,    0,    0, 2500, 1000]$ represents the shadow prices for the dual variables. 
+
+
+```{r, echo=TRUE, eval=TRUE}
+# Helper function for sensitivity analysis of RHS constraint
+printSensitivityRHS2 <- function(model){
+
+  options(scipen=999)
+  arg.rhs =get.sensitivity.rhs(model)
+  numRows <- length(arg.rhs$duals)
+  
+  symb <- c() 
+  for (i in c(1:numRows)) symb[i] <- paste("B", i, sep = "" ) 
+   
+  rhs <- data.frame(rhs = symb,arg.rhs)
+  
+  rhs<-rhs %>%
+  mutate(dualsfrom=replace(dualsfrom, dualsfrom < -1.0e4, "-inf")) %>%
+  mutate(dualstill=replace(dualstill, dualstill > 1.0e4, "inf")) 
+  
+  result <- ""
+  result <- cat("    RHS", "\t", "Sensitivity", "\n")
+  i <- 1
+  for (row in 1:nrow(rhs)) {
+    vl <- rhs[row, "rhs"]
+    dfrom  <- rhs[row, "dualsfrom"]
+    dtill  <- rhs[row, "dualstill"]
+    duals <-  rhs[row, "duals"]
+    s <- paste( i, ".\t", vl, "\t", dfrom, " <= ", vl, " <= ", dtill)
+    result <- cat( result, s, sep = "\n")
+    i <- i+1
+  }
+  print(result)
+}
+```
+
+
+```{r, echo=TRUE, eval=TRUE}
+printSensitivityRHS2(model)
+```
+The sensitivity analysis of the **RHS** suggests that for the constraints $B_4$ - $B_8$, whose shadow price is zero, a small change  of its value does not affect the solution.
+
+Constraint $B_2$, which represents weight capacity of the wagon n. $2$, is a binding constraint and any change of its value would cause the optimal solution to ne not feasible any more.   
+
+For the remaining constraints, these are the allowed intervals: 
+
+* $5  \le  B_1  \le  15$  
+* $12  \le  B_3  \le 16$
+* $0  \le  B = 9 \le  10$ 
+* $15 \le B_10  \le  20
+
+
+# Questions about LP
+
+1.	Can an LP model have more than one optimal solution. Is it possible for an LP model to have exactly two optimal solutions? Why or why not?
+
+**Answer:** An LP model can have more than one optimal solution. However, it cannot have exactly two optimal solutions: either we have one or infinite number of solutions. Supposed that A and B are two optimal solutions, then every point of the segment AB have to be an optimal solution.  
+
+2. Are the following objective functions for an LP model equivalent? That is, if they are both used, one at a time, to solve a problem with exactly the same constraints, will the optimal values for $x_1$ and $x_2$ be the same in both cases? Why or why not?
+
+$$
+\max 2x_1+3x_2\\
+\min -2x_1-3x_2
+$$
+**Answer:** Yes, they are. They are the same functions with opposite signs, therefore the maximum of the first one is the minimum of the second one.  
+
+3. Which of the following constraints are not linear or cannot be included as a constraint in a linear programming problem? 
+
+
+a. $2 x_1+x_2-3 x_3 \geq 50$ **Yes**
+
+b. $2 x_1+\sqrt{x_2} \geq 60$ **No**
+
+c. $4 x_1- \frac{1}{2} x_2=75$ **Yes**
+
+d. $\frac{3 x_1+2 x_2x-3 x_3}{x_1+x_2+x_3} \leq 0.9$ **Yes** $x_1+x_2+x_3\gt0$, if variables are non-negative 
+
+e. $3 x_1^2+7 x_2 \leq 45$ **No**
+

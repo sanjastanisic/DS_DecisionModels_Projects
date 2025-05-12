@@ -1,0 +1,419 @@
+---
+title: "Assignment 3 - Solution"
+author: "Sanja Stanisic, n. 800409"
+date: "26 May 2020"
+output:
+  prettydoc::html_pretty:
+    df_print: paged
+    highlight: vignette
+    theme: architect
+    toc: yes
+    toc_depth: 5
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '5'
+  slidy_presentation:
+    highlight: default
+  pdf_document:
+    toc: yes
+    toc_depth: 5
+  beamer_presentation:
+    colortheme: lily
+    fig_caption: no
+    fig_height: 6
+    fig_width: 7
+    fonttheme: structurebold
+    theme: Hannover
+    toc: yes
+  ioslides_presentation:
+    css:
+    - css/fonts.css
+    - css/custom.css
+    - css/title-slide.css
+    - css/slide-background.css
+    includes:
+      before_body: html/title.html
+    toc: yes
+    transition: default
+    widescreen: yes
+course: Decision Models
+---
+
+```{r setup, include=FALSE}
+# Use 'verbatim = TRUE' as chunk option to show chunk code as is
+if(require(knitr)==FALSE) install.packages("knitr")
+hook_source_def = knit_hooks$get('source')
+knit_hooks$set(source = function(x, options){
+  if (!is.null(options$verbatim) && options$verbatim){
+    opts = gsub(",\\s*verbatim\\s*=\\s*TRUE\\s*", "", options$params.src)
+    bef = sprintf('\n\n    ```{r %s}\n', opts, "\n")
+    stringr::str_c(bef, paste(knitr:::indent_block(x, "    "), collapse = '\n'), "\n    ```\n")
+  } else {
+     hook_source_def(x, options)
+  }
+})
+```
+
+## Problem 1
+
+Using the bisection method calculate at least one zero for $$f(x)=−x^3+4x^2−2$$ starting for a suitable initial guess. You may want to reuse the code provided in the exercise session.
+
+### Solution 1
+
+```{r message=FALSE, warning=FALSE}
+
+library(NLRoot)
+
+func <- function(x) {
+  return (−x^3+4*x^2−2)
+}
+
+curve(func, xlim=c(-3,3), col='blue', lwd=1.5, lty=2)
+abline(h=0)
+abline(v=0)
+
+```
+
+As the graph shows  there are two roots of the equation $$f(x)=−x^3+4x^2−2 = 0$$
+Therefore, we can apply the bisection method on two intervals: $[-1,0]$ and $[0,1]$.
+
+
+```{r message=FALSE, warning=FALSE}
+BFfzero(func, -1, 0)
+
+BFfzero(func, 0, 1)
+```
+
+The solution in the interval $[-1,0]$ is $-0.6554413$, and $0.7892426$ in the interval $[0,1]$. 
+
+If we want to find roots of the equation and not use the library *NLRoot*, we can do as follows: 
+
+```{r message=FALSE, warning=FALSE}
+bisection <- function(f, a, b, n = 1000, tol = 1e-7) {
+    if (sign(f(a) == sign(f(b)))) {
+    stop('signs of f(a) and f(b) must differ')
+  }
+  for (i in 1:n) {
+    c <- (a + b) / 2 # Calculate midpoint
+    if ((f(c) == 0) || ((b - a) / 2) < tol) {
+      return(c)
+    }
+    
+    if (sign(f(c)) == sign(f(a))){
+           a <- c
+    }
+    else {
+      b <- c
+    }       
+  }
+  print('Too many iterations')
+}
+
+bisection(func, -1, 0)
+
+bisection (func, 0, 1)
+```
+
+The obtained solutions are equal to those obtained by using the *NLRoot* library.
+
+## Problem 2
+
+Consider the following minimization problem:  $$min \  f(x1,x2)=2x_1^2+x_1x_2+2(x_2−3)^2$$.
+
+1. Apply an iteration of the gradient method by performing the line search in an exact way, starting from the point $A=(−1,4)^{T}$.        Report all the steps of the method, not just the result. 
+
+2. Apply an iteration of Newton’s method from point A. Verify that the point found is the minimum of function f. Report all the       steps of the method, not just the result.
+
+3. How many iterations of Newton’s method are required to optimize a quadratic function?
+
+### Solution 2.1 
+
+Since $$f(x1,x2)=2x_1^2+x_1x_2+2(x_2−3)^2$$
+
+then $$ \nabla f(x_1, x_2) = \left[
+\begin{array}
+{c}
+4x_1+x_2 \\
+x_1+4(x_2-3)
+\end{array}\right] $$
+
+
+$x_0 = \left[
+\begin{array}
+{c}
+-1 \\
+4 
+\end{array}\right]$
+  
+$f(x_0) = 2-4+2=0$
+  
+Since we are minimizing the function, the search vector is negative:
+
+$$d_0 = - \nabla f(x_0) \\
+d_0 = -\left[
+\begin{array}
+{c}
+4(-1)+4 \\
+-1+4(4-3)\end{array}\right] \\
+d_0 = -\left[
+\begin{array}
+{c}0 \\
+3\end{array}\right] = \left[
+\begin{array}
+{c}0 \\
+-3\end{array}\right]$$
+
+  
+The next point is calculated as follows:
+
+$$ x_1 = x_0 + \alpha_0 d_0$$
+  
+In order to calculate $\alpha_0$, function $f(x_1)$ should be minimized:
+
+$$f(x_1) = f (x_0 + \alpha_0 d_0) = f ( \left[
+\begin{array}
+{c}
+-1 \\
+4 
+\end{array}\right] +
+\alpha_0 \left[ \begin{array}
+{c}
+0 \\
+-3 
+\end{array}\right] 
+) = f(\left[
+\begin{array}
+{c}
+-1 \\
+4-3\alpha_0
+\end{array}\right]) $$  
+
+$$f(x_1) = 2(-1)^2 + (-1)(4-3\alpha_0) +2(4-3\alpha_0-3)^2 = 2 + (3\alpha_0 - 4) + 2(1-3\alpha_0)^2$$   
+
+We set $$\frac {df(x_1)} {d\alpha_0} = 0$$ and solve for $\alpha_0$ using a single-variable solution method. 
+$$\frac{df(x_1)} {d\alpha_0} =  3+4(1-3\alpha_0)(-3)$$
+$$\frac {df(x_1)} {d\alpha_0} = 3-12+36\alpha_0 = 0$$
+$$36 \alpha_0 -9 = 0$$
+$$\alpha_0 = \frac {9}  {36} = \frac {1}  {4}$$
+$$x_1 = x_0 + \alpha_0 d_0 =  \left[
+\begin{array}
+{c}
+-1 \\
+4 
+\end{array}\right] +
+\frac{1}{4} \left[
+\begin{array}
+{c}
+0 \\
+-3 
+\end{array}\right] = \left[
+\begin{array}
+{c}-1 \\
+\frac{13}{4}
+\end{array}\right]$$
+
+At this point we have to check whether a stop criterion is fulfilled: $$||\nabla f(x_1)|| < \epsilon $$ 
+$\epsilon$ being a value close to zero (for the purpose of this exercise we can set $\epsilon = 0.1$ )
+
+$$ \nabla f(x_1) = [4(-1) +\frac{13}{4}, -1+4(\frac{13}{4}-3)] = [-\frac{3}{4},0]$$ 
+$$ || \nabla f(x_1)|| = \sqrt{(-\frac{3}{4})^2 + 0^2} = \frac{3}{4} = 0,75 >\epsilon $$ 
+Therefore the stop criterion is not fulfilled and we should proceed by finding the next point. 
+
+### Solution 2.2 
+
+Since $$ f(x_1, x_2) = 2 x_1^2 + x_1 x_2 + 2 (x_2 - 3)^2$$
+then $$ \nabla f(x_1, x_2) = \left[
+\begin{array}
+{c}
+4 x_1 + x_2 \\
+x_1 + 4(x_2 - 3)\end{array}\right]$$
+and therefore 
+$$ H (x_1, x_2) = \left[
+\begin{array}
+{c c}
+4&1 \\
+1&4 
+\end{array}\right]$$
+
+The start point is: 
+$$k =0$$
+$$ x_0 = \left[
+\begin{array}
+{c}
+-1 \\
+4 
+\end{array}\right]$$
+
+The gradient at $x_0$ is
+$$\nabla f(x_0) = \left[
+\begin{array}
+{c}
+4(-1)+4 \\ 
+-1+4(4-3)\end{array}\right] = \left[
+\begin{array}
+{c}0 \\ 3\end{array}\right]$$
+
+$$ H(x_0) = \left[
+\begin{array}
+{c c}
+4&1 \\
+1&4 
+\end{array}\right]$$
+
+$$ H(x_0)^{-1} = \left[
+\begin{array}
+{c c}
+4&1 \\
+1&4 
+\end{array}\right]^{-1} =
+\frac {1}{15}
+\left[
+\begin{array}
+{c c}
+4&-1 \\
+-1&4 
+\end{array}\right] = 
+\left[
+\begin{array}
+{c c}
+\frac{4}{15}&\frac{-1}{15} \\
+\frac{-1}{15}& \frac{4}{15} 
+\end{array}\right]$$
+
+The next point is calculated as follows: 
+
+$$x_1 = x_0 - H(x_0)^{-1}\nabla f(x_0)$$
+$$x_1 = \left[
+\begin{array}
+{c}
+-1 \\
+4 
+\end{array}\right] -
+\left[
+\begin{array}
+{c c}
+\frac{4}{15}&\frac{-1}{15} \\
+\frac{-1}{15}& \frac{4}{15} 
+\end{array}\right]
+\left[
+\begin{array}
+{c}
+0 \\
+3 
+\end{array}\right] = 
+\left[
+\begin{array}
+{c}
+\frac{-4}{5} \\
+\frac{16}{5} 
+\end{array}\right]$$
+
+The gradient at $x_1$ is: 
+
+$$\nabla f(x_1) = \left[
+\begin{array}
+{c}
+4\frac{-4}{5}+\frac {16}{5} \\ 
+\frac{-4}{5}+4 (\frac{16}{5}-3)\end{array}\right] 
+= \left[
+\begin{array}
+{c}
+0 \\ 
+0\end{array}\right]$$
+
+Since the gradient is zero, the method has converged and the point $$x_1 = \left[
+\begin{array}
+{c}
+\frac{-4}{5} \\
+\frac{16}{5} 
+\end{array}\right]$$
+
+is a minimum of the function $$f(x_1,x_2)=2x_1^2+x_1x_2+2(x_2−3)^2$$
+
+### Solution 2.3
+
+Because it uses the 2nd derivative, Newton’s Method models quadratic functions exactly and can find the optimum point in one iteration.
+
+## Problem 3
+
+Use the Simulated annealing algorithm to find the global minimum of the following function.
+$$f(x)=34 e^{-\frac{1}{2}\left(\frac{x-88}{2}\right)^2}+\left(\frac{x}{10}-2sin\left(\frac{x}{10}\right)\right)^2$$
+Notice that $f(x)$ may have several local optima, thus restarting and a careful selection of the algorithm
+parameters may be necessary.
+
+### Solution 3
+
+Function $f(x)$ is as follows:
+
+```{r message=FALSE, warning=FALSE}
+funct <- function(x){
+  34 * exp(-0.5 * ((x-88.0)/2.0)^2 ) + (x/10.0-2*sin(x/10.0))^2
+}
+```
+
+The graph of this function, on interval $[-500, 500]$ looks like:
+```{r message=FALSE, warning=FALSE}
+curve(funct(x), xlim=c(-500,500), col='blue', lwd=1.5, lty=2)
+abline(h=0)
+abline(v=0)
+
+```
+
+Due to the fact that $f(-x) = f(x)$ graph of the function is symetric to $Oy$ axis, so it is sufficient to look for minima when 
+$x>0$. In other words, for each positive $x_0$ that is minimum of the function $f$, there is an negative $-x_0$ that also have to be minimum of the function $f$. 
+
+Morover, global trend can be detected and global minimum can not exixts for large $x$.  
+
+If the interval is restricted to $[0,30]$, the graph looks like: 
+```{r message=FALSE, warning=FALSE}
+curve(funct(x), xlim=c(0,50), col='blue', lwd=1.5, lty=2)
+abline(h=0)
+abline(v=0)
+```
+
+The prevous graph indicate that there can be two positive global minima, one in the interval $[-1,10]$, another in the interval $[10,30]$.
+
+For determination of the optimal values in those intervals, Simulated Annealing Algorithm is used (more precisely, R library GenSA):
+```{r message=FALSE, warning=FALSE}
+library(GenSA)
+```
+
+Firstly, Simulated Annealing Algorithm is applied on the interval $[-1,10]$. In this run, random seed is set on 1235 and maximum execution time for algorithm is set to $5$ seconds:
+```{r message=FALSE, warning=FALSE}
+
+set.seed(1235) 
+dimension <- 1
+tol <- 1e-13
+lower <- rep(-1, dimension)
+upper <- rep(10, dimension)
+
+out <- GenSA(lower = lower, upper = upper, 
+             fn = funct,
+             control=list(max.time=5, verbose = FALSE))
+
+out[c("value","par","counts")]
+
+```
+The obtained solution $x_0$ is close to $0$ - more precisely $$x_0 = -1.403366 \ \ 10^{-14}$$ and $f(x_0)$ is close to $0$ - 
+$$ f(x_0)=1.969435 \ \ 10^{-30}$$. 
+
+After that, Simulated Annealing Algorithm is applied on the interval $[10,30]$. In this run, all parameters (except the interval) are the same:
+```{r message=FALSE, warning=FALSE}
+set.seed(1235) 
+dimension <- 1
+tol <- 1e-13
+lower <- rep(10, dimension)
+upper <- rep(30, dimension)
+
+out <- GenSA(lower = lower, upper = upper, 
+             fn = funct,
+             control=list(max.time=5, verbose = FALSE))
+
+out[c("value","par","counts")]
+
+```
+The results indicate that the obtained solution is $$x_1 =18.95494$$ and that $f(x_1)$ is also very close to $0$ - 
+$$f(x_1)=7.894958 \ \ 10^{-22}$$. 
+
+Therefore, it can be concluded that there are three global minima for this function: $x_0 = -1.403366 \ \ 10^{-14}$, $x_1 =18.95494$ and $x_2 =-18.95494$ with function values close to $0$. 

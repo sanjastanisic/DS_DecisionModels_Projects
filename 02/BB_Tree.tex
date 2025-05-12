@@ -1,0 +1,260 @@
+\documentclass[10pt,letterpaper]{article}
+ \usepackage[utf8x]{inputenc}
+\usepackage{latexsym}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amstext}
+\usepackage{xcolor}
+\usepackage{framed}
+\usepackage{enumerate}
+
+\colorlet{shadecolor}{black!10}
+\usepackage{hyperref}
+\hypersetup{
+  bookmarks=true,         % show bookmarks blaar?
+    unicode=false,          % non-Latin characters in Acrobats bookmarks
+    pdfnewwindow=true,      % links in new window
+    colorlinks=true,       % false: boxed links; true: colored links
+    linkcolor=red,          % color of internal links
+    citecolor=green,        % color of links to bibliography
+    filecolor=magenta,      % color of file links
+    urlcolor=blue, % color of external links
+}
+
+%\usepackage{tabularx}
+%\usepackage[latin1]{inputenc}
+%\usepackage{bbold}
+
+\usepackage{graphicx}
+\graphicspath{{./figures/}}
+\usepackage{pstricks}
+\usepackage{tikz}
+\usepackage{amsmath}
+\usepackage{xspace}
+\newcommand{\A}{\ensuremath{\mathcal{A}}\xspace}
+\newcommand{\B}{\ensuremath{\mathcal{B}}\xspace}
+\newcommand\pa[1]{\ensuremath{\left(#1\right)}}
+\usepackage{pgfplots}
+\usepackage{forest}
+%\useforestlibrary{edges}
+%\pgfplotsset{width=7cm}
+%\usetikzlibrary{backgrounds}
+\usetikzlibrary{arrows,patterns,decorations.pathmorphing,shapes,positioning} 
+\usepackage{tikzscale}
+%\usepackage{pst-all}
+\usepackage{verbatim}
+
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\EE}{\mathbb{E}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\proba}{\mathbb{P}}
+%\newcommand{\P}{\mathbb{P}}
+\newcommand{\PP}{\mathbb{P}}
+\newcommand{\var}{\mathbb{V}ar}
+\newcommand{\C}{\mathcal{C}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\OM}{\Omega}
+
+\usepackage{amsthm}
+\newtheorem{theorem}{Theorem}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{ex}{Exercise}
+
+\newenvironment{solution}{\begin{shaded} {\bf Solution}}{\end{shaded}} 
+
+\def\thesection{}
+%\newcounter{thesession}
+\newcommand{\session}[2]{%\stepcounter{thesession} 
+  \newpage
+  \pagestyle{empty}\begin{raggedright}
+    \raisebox{-.4\height}{\includegraphics[height=1.5cm]{disco.png}}
+    \begin{tabular}{ll}
+      Universit\`a degli Studi di Milano-Bicocca & \ \ \ \ \ \ Instructor: Enza
+      Messina\\ 
+      Dipartimento Informatica Sistemistica e Comunicazione 
+      &   \ \ \ \ \ \ Assistant : Mauricio Soto\\
+      E3101Q128 - Ricerca Operativa e Pianificazione delle Risorse 
+      & \ \ \ \ \ \ %Tutor: Michele Perrotta
+    \end{tabular}\\
+  \end{raggedright}
+  \begin{center}
+%    \Large{Session \arabic{thesession}}
+%    \large{#1}\\
+    \section{#2}
+\end{center}
+\normalsize
+}
+
+\oddsidemargin  0pt  \topmargin -1.0in \headsep 25pt \headheight
+13pt \textwidth 6.7in \textheight 9.6in \voffset 0in
+\marginparwidth 0pt \marginparsep 0pt \evensidemargin  0pt
+\parskip 1.5ex \parindent 0em
+\hfuzz 6pt
+
+\DeclareMathOperator{\sign}{sign}
+\pgfplotsset{compat=1.11} 
+\begin{document}
+
+\newcommand{\Real}{I \hspace{-0.80ex} R}
+\newcommand{\XX}{\underline{\overline{\text{X}}}}
+
+\begin{center}
+\hspace{-50pt}\resizebox{1\linewidth}{!}{
+\def\textA{$\text{min}\ x_1-2x_2$\\
+subject to\\
+\hspace{1cm}\vdots}
+
+\def\textB{ $\mathbf{P_0}\quad z=16.5$
+\nodepart{two}
+{ $x^*=(5/6,1,0,1)$}
+}
+
+\def\textC{ $\mathbf{P_1}\quad z=16.2$
+\nodepart{two}
+{ $x^*=(1,4/5,0,4/5)$}
+}
+
+\def\textD{ $\mathbf{P_2}\quad z=9$
+\nodepart{two}
+{ $x^*=(0,1,0,1)$}
+}
+
+\def\textR{ $\mathbf{P_3}\quad z=9$
+\nodepart{two}
+{ $x^*=(0,1,0,1)$}
+}
+
+\def\textS{ $\mathbf{P_4}\quad z=0$
+\nodepart{two}
+{ $x^*=(0,0,0,0)$}
+}
+
+
+\def\textE{ $\mathbf{P_7}\quad z=16$
+\nodepart{two}
+{ $x^*=(1,1,0,1/2)$}
+}
+
+\def\textF{ $\mathbf{P_{12}}\quad z=13.8$
+\nodepart{two}
+{ $x^*=(1,0,4/5,0)$}
+}
+
+
+\def\textG{ $\mathbf{P_8}$
+\nodepart{two}
+{unfeasible}
+}
+
+\def\textH{ $\mathbf{P_9}\quad z=16$
+\nodepart{two}
+{ $x^*=(1,1,0,1/2)$}
+}
+
+\def\textI{ $\mathbf{P_{13}}$
+\nodepart{two}
+{unfeasible}
+}
+
+\def\textJ{ $\mathbf{P_{14}}\quad z=9$
+\nodepart{two}
+{ $x^*=(1,0,0,0)$}
+}
+
+
+\def\textK{ $\mathbf{P_{10}}$
+\nodepart{two}
+{unfeasible}
+}
+
+\def\textL{ $\mathbf{P_{11}}\quad z=14$
+\nodepart{two}
+{ $x^*=(1,1,0,0)$}
+}
+
+\def\textM{ $\mathbf{P_{15}}$
+\nodepart{two}
+{unfeasible}
+}
+
+\def\textN{ $\mathbf{P_{16}}\quad z=9$
+\nodepart{two}
+{ $x^*=(1,0,0,0)$}
+}
+
+\def\textO{ $\mathbf{P_{5}}$
+\nodepart{two}
+{unfeasible}
+}
+
+\def\textP{ $\mathbf{P_{6}}$
+\nodepart{two}
+{unfeasible}
+}
+\begin{tikzpicture}
+\tikzset{>=stealth,parent   node/.style={rectangle    split,   rectangle   split
+    parts=2,align=left,text width=3cm,draw,node distance=1cm and 1cm}} 
+
+%\node[parent node,rectangle split parts=1](A){\textA};
+\node[parent node](B){\textB};
+\node[parent node,below left =of B,text width=3.3cm](C){\textC};
+\node[parent node,below right =of B](D){\textD};
+
+\node[parent node,node distance=1 and -1,below left =of D](R){\textR};
+\node[parent node,node distance=1 and -1,below right =of D](S){\textS};
+
+\node[parent node,node distance=1 and -1,below left =of C](E){\textE};
+\node[parent node,node distance=1 and -1,below right =of C](F){\textF};
+
+\node[parent node,node distance=1 and 0,below left =of E,text width=2cm](G){\textG};
+\node[parent node,node distance=1 and -2.7,below right =of E,text width=3cm](H){\textH};
+
+\node[parent node,node distance=1 and -1.5,below left =of F,text width=2cm](I){\textI};
+\node[parent node,node distance=1 and -1,below right =of F,text width=3cm](J){\textJ};
+
+\node[parent node,node distance=1 and 0,below left =of H,text width=2cm](K){\textK};
+\node[parent node,node distance=1 and -2,below right =of H,text width=3cm](L){\textL};
+
+\node[parent node,node distance=1 and -1,below left =of J,text width=2cm](M){\textM};
+\node[parent node,node distance=1 and -1,below right =of J,text width=3cm](N){\textN};
+
+\node[parent node,node distance=1 and -1,below right =of R,text width=2cm](O){\textO};
+
+\node[parent node,node distance=1 and 0,below =of S,text width=2cm](P){\textP};
+
+%\draw[->](A.south)--(B)node[midway,right]{ solve as continous problem};
+\draw[->](B.south)--(D)node[above right,midway]{ $x_1= 0$};
+\draw[->](B.south)--(C)node[above left,midway]{ $x_1= 1$};
+\draw[->](D.south)--(R)node[above left,midway]{ $x_2= 1$};
+\draw[->](D.south)--(S)node[above right,midway]{ $x_2= 0$};
+
+\draw[->](C.south)--(E)node[above left,midway]{ $x_2= 1$};
+\draw[->](C.south)--(F)node[above right,midway]{ $x_2 =0$};
+
+\draw[->](E.south)--(G)node[above left,midway]{ $x_3= 1$};
+\draw[->](E.south)--(H)node[above right,midway]{ $x_3 =0$};
+
+\draw[->](F.south)--(I)node[above left,midway]{ $x_3= 1$};
+\draw[->](F.south)--(J)node[above right,midway]{ $x_3 =0$};
+
+\draw[->](H.south)--(K)node[above left,midway]{ $x_4= 1$};
+\draw[->](H.south)--(L)node[above right,midway]{ $x_4 =0$};
+
+\draw[->](J.south)--(M)node[above left,midway]{ $x_4= 1$};
+\draw[->](J.south)--(N)node[above right,midway]{ $x_4 =0$};
+
+\draw[->](R.south)--(O)node[above right,midway]{ $x_3 =1$};
+
+\draw[->](S.south)--(P)node[above right,midway]{ $x_3 =1$};
+\end{tikzpicture}
+}
+
+\end{center}
+
+
+
+\end{document}
